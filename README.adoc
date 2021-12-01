@@ -12,10 +12,6 @@ are made using `cargo run` - this means that the binaries will be recompiled on
 any change to the codebase. To specify the location of your checkout of
 `radicle-link` you'll need to modify the `env` file.
 
-You'll need `systemd-socket-activate` installed locally and you'll need a
-checkout of the `radicle-link` repository. We'll assume that the location of
-your local checkout is in the `$LINK_CHECKOUT` environment variable.
-
 == Running the scenario
 
 We're going to simulate a socket activated p2p node which announces changes to a
@@ -34,7 +30,7 @@ you are creating twice. I just use "1234" in both cases.
 
 [source,bash]
 ----
-include::./create-rad-homes.sh[]
+./create-rad-homes.sh
 ----
 
 === Add SSH keys to ssh-agent
@@ -44,14 +40,14 @@ your passphrases again.
 
 [source,bash]
 ----
-include::./add-ssh-keys.sh[]
+./add-ssh-keys.sh
 ----
 
 === Create a default identity for the socket activated node
 
 [source,bash]
 ----
-include::./create-identity.sh[]
+./create-identity.sh
 ----
 
 === Create a local repository
@@ -60,7 +56,7 @@ We create a working copy which we're going to add to the local monorepo.
 
 [source,bash]
 ----
-include::./create-repo.sh[]
+./create-repo.sh
 ----
 
 === Start the seed
@@ -69,7 +65,7 @@ In a fresh terminal:
 
 [source,bash]
 ----
-include::./start-seed.sh[]
+./start-seed.sh
 ----
 
 === Start the socket activated node
@@ -78,7 +74,7 @@ In a fresh terminal:
 
 [source,bash]
 ----
-include::./start-socket-activated.sh[]
+./start-socket-activated.sh
 ----
 
 === Make some changes in the repo
@@ -95,7 +91,7 @@ git commit -m "test"
 
 [source,bash]
 ----
-include:./push-changes.sh[]
+./push-changes.sh
 ----
 
 === Examine results
