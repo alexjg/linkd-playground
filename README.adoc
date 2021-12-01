@@ -1,0 +1,107 @@
+= Linkd Playground
+
+This is a set of scripts for playing with the linkd binary in `radicle-link`. I
+have been playing with it using revision
+`957abebd9ac6b2d71b89c1a8d9ff2163dadd48fb`
+
+== How to use this
+
+The scripts here are all designed to work with a local checkout of
+`radicle-link`. In particular all invocations of the `rad` and `linkd` binaries
+are made using `cargo run` - this means that the binaries will be recompiled on
+any change to the codebase. To specify the location of your checkout of
+`radicle-link` you'll need to modify the `env` file.
+
+You'll need `systemd-socket-activate` installed locally and you'll need a
+checkout of the `radicle-link` repository. We'll assume that the location of
+your local checkout is in the `$LINK_CHECKOUT` environment variable.
+
+== Running the scenario
+
+We're going to simulate a socket activated p2p node which announces changes to a
+long running seed node. First we'll create two separate profiles, then we'll
+create an identity and a project under one of those profiles. Next we'll start a
+socket acivated listener for the profile which owns the project and a longer
+running listener for the other profile. Finally we'll push some changes to the
+project which will start the socket activated listener, which will then announce
+it's changes to the long running node.
+
+=== Create profiles
+
+We must create two profiles in separate RAD_HOMEs, one for the local node and
+one for the seed. This script will prompt you for a passphrase for the profile
+you are creating twice. I just use "1234" in both cases.
+
+[source,bash]
+----
+include::./create-rad-homes.sh[]
+----
+
+=== Add SSH keys to ssh-agent
+
+Add the ssh keys for each profile to the ssh-agent, this will prompt you for
+your passphrases again.
+
+[source,bash]
+----
+include::./add-ssh-keys.sh[]
+----
+
+=== Create a default identity for the socket activated node
+
+[source,bash]
+----
+include::./create-identity.sh[]
+----
+
+=== Create a local repository
+
+We create a working copy which we're going to add to the local monorepo.
+
+[source,bash]
+----
+include::./create-repo.sh[]
+----
+
+=== Start the seed
+
+In a fresh terminal:
+
+[source,bash]
+----
+include::./start-seed.sh[]
+----
+
+=== Start the socket activated node
+
+In a fresh terminal:
+
+[source,bash]
+----
+include::./start-socket-activated.sh[]
+----
+
+=== Make some changes in the repo
+
+[source,bash]
+----
+cd theproject
+echo "test" > test
+git add test
+git commit -m "test"
+----
+
+=== Push the changes to the socket activated node
+
+[source,bash]
+----
+include:./push-changes.sh[]
+----
+
+=== Examine results
+
+If you take a look at the output of the socket activated node you'll see it
+starting up, connecting to the seed, and then announcing changes. Likewise in
+the seed you'll see it tracking a new project and pulling the changes. Finally
+if you do `tree /tmp/seed-home/<profile ID>/git/refs` you'll see the project
+refs are there.
