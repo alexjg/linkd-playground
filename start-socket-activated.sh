@@ -1,7 +1,7 @@
 export $(cat env)
 
 profile_id=$(RAD_HOME=/tmp/socket-activated-home \
-    cargo +nightly-2021-06-17 run \
+    cargo run \
         --target-dir ./target \
         --manifest-path $LINK_CHECKOUT/bins/Cargo.toml \
         --release \
@@ -9,12 +9,12 @@ profile_id=$(RAD_HOME=/tmp/socket-activated-home \
 api_socket=/tmp/socket-activated-home/$profile_id/sockets/api;
 event_socket=/tmp/socket-activated-home/$profile_id/sockets/events;
 seed_peer_id=$(RAD_HOME=/tmp/seed-home \
-    cargo +nightly-2021-06-17 run \
+    cargo run \
         --target-dir ./target \
         --manifest-path $LINK_CHECKOUT/bins/Cargo.toml \
         --release \
         -p rad -- profile peer);
-cargo +nightly-2021-06-17 build \
+cargo build \
     --target-dir ./target \
     --manifest-path $LINK_CHECKOUT/bins/Cargo.toml \
     --release \

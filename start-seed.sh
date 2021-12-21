@@ -1,6 +1,6 @@
 export $(cat env)
 
-cargo +nightly-2021-06-17 build \
+cargo build \
     --target-dir ./target \
     --manifest-path $LINK_CHECKOUT/bins/Cargo.toml \
     --release \
