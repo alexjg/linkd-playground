@@ -6,8 +6,14 @@ profile_id=$(RAD_HOME=/tmp/socket-activated-home \
         --manifest-path $LINK_CHECKOUT/bins/Cargo.toml \
         --release \
         -p rad -- profile get);
-api_socket=/tmp/socket-activated-home/$profile_id/sockets/api;
-event_socket=/tmp/socket-activated-home/$profile_id/sockets/events;
+peer_id=$(RAD_HOME=/tmp/socket-activated-home \
+    cargo run \
+        --target-dir ./target \
+        --manifest-path $LINK_CHECKOUT/bins/Cargo.toml \
+        --release \
+        -p rad -- profile peer);
+rpc_socket=$XDG_RUNTIME_DIR/link-peer-$peer_id-rpc.socket;
+events_socket=$XDG_RUNTIME_DIR/link-peer-$peer_id-events.socket;
 seed_peer_id=$(RAD_HOME=/tmp/seed-home \
     cargo run \
         --target-dir ./target \
@@ -20,9 +26,9 @@ cargo build \
     --release \
     -p linkd;
 systemd-socket-activate \
-    -l $api_socket \
-    -l $event_socket \
-    --fdname=api:events \
+    -l $rpc_socket \
+    -l $events_socket \
+    --fdname=rpc:events \
     -E SSH_AUTH_SOCK \
     ./target/release/linkd \
     --rad-home /tmp/socket-activated-home \
