@@ -7,7 +7,7 @@ have been playing with it using revision
 == How to use this
 
 The scripts here are all designed to work with a local checkout of
-`radicle-link`. In particular all invocations of the `rad` and `linkd` binaries
+`radicle-link`. In particular all invocations of the `lnk` and `linkd` binaries
 are made using `cargo run` - this means that the binaries will be recompiled on
 any change to the codebase. To specify the location of your checkout of
 `radicle-link` you'll need to modify the `env` file.
@@ -24,13 +24,13 @@ it's changes to the long running node.
 
 === Create profiles
 
-We must create two profiles in separate RAD_HOMEs, one for the local node and
+We must create two profiles in separate LNK_HOMEs, one for the local node and
 one for the seed. This script will prompt you for a passphrase for the profile
 you are creating twice. I just use "1234" in both cases.
 
 [source,bash]
 ----
-./create-rad-homes.sh
+./create-lnk-homes.sh
 ----
 
 === Add SSH keys to ssh-agent
@@ -58,6 +58,8 @@ We create a working copy which we're going to add to the local monorepo.
 ----
 ./create-repo.sh
 ----
+
+This will output some JSON including the URN of the project, make a note of the URN.
 
 === Start the seed
 
@@ -87,11 +89,22 @@ git add test
 git commit -m "test"
 ----
 
+=== Add the linkd remote to the repository
+
+The URN here is the URN output by the create-repo.sh script. You can also find
+it in the git config. There will be a remote called `rad` with a URL of the form
+`rad://<URN>`. 
+
+[source,bash]
+----
+git remote add linkd 'ssh://rad@127.0.0.1:9876/<URN>'
+----
+
 === Push the changes to the socket activated node
 
 [source,bash]
 ----
-./push-changes.sh
+git push linkd main
 ----
 
 === Examine results
