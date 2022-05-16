@@ -1,11 +1,11 @@
 export $(cat env)
 
-profile_id=$(LNK_HOME=/tmp/socket-activated-home \
+profile_id=$(LNK_HOME=/tmp/link-local-1 \
     cargo run \
         --target-dir ./target \
         --manifest-path $LINK_CHECKOUT/bins/Cargo.toml \
         -p lnk -- profile get);
-peer_id=$(LNK_HOME=/tmp/socket-activated-home \
+peer_id=$(LNK_HOME=/tmp/link-local-1 \
     cargo run \
         --target-dir ./target \
         --manifest-path $LINK_CHECKOUT/bins/Cargo.toml \
@@ -27,7 +27,7 @@ systemd-socket-activate \
     --fdname=rpc:events \
     -E SSH_AUTH_SOCK \
     ./target/debug/linkd \
-    --lnk-home /tmp/socket-activated-home \
+    --lnk-home /tmp/link-local-1 \
     --bootstrap $seed_peer_id@127.0.0.1:8799 \
     --linger-timeout 10000 \
     --protocol-listen 127.0.0.1:8899
