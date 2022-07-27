@@ -1,8 +1,6 @@
 = Linkd Playground
 
-This is a set of scripts for playing with the linkd binary in `radicle-link`. I
-have been playing with it using revision
-`957abebd9ac6b2d71b89c1a8d9ff2163dadd48fb`
+This is a set of scripts for playing with the binaries in `radicle-link`. 
 
 == How to use this
 
@@ -14,19 +12,17 @@ any change to the codebase. To specify the location of your checkout of
 
 == Running the scenario
 
-We're going to simulate a socket activated p2p node which announces changes to a
-long running seed node. First we'll create two separate profiles, then we'll
-create an identity and a project under one of those profiles. Next we'll start a
-socket acivated listener for the profile which owns the project and a longer
-running listener for the other profile. Finally we'll push some changes to the
-project which will start the socket activated listener, which will then announce
-it's changes to the long running node.
+We're going to simulate two maintainers trying to collaborate via a seed node.
+The first maintainer will create a project and push it to their local monorepo
+via a running `gitd`. The `gitd` will then push the new changes to the seed.
+Finally the second maintainer will pull the changes from the seed to their local
+monorepo and checkout a working copy using `lnk clone`.
 
 === Create profiles
 
-We must create two profiles in separate LNK_HOMEs, one for the local node and
-one for the seed. This script will prompt you for a passphrase for the profile
-you are creating twice. I just use "1234" in both cases.
+We must create three profiles in separate LNK_HOMEs, one for each of the
+maintainers and one for the seed. This script will prompt you for a passphrase
+for the profile you are creating three times. I just use "1" in each case.
 
 [source,bash]
 ----
@@ -43,7 +39,10 @@ your passphrases again.
 ./add-ssh-keys.sh
 ----
 
-=== Create a default identity for the socket activated node
+=== Create a default identity for the maintainers
+
+This effectively runs `lnk identities person create` followed by `lnk
+identities local set --urn <the urn we just created>`
 
 [source,bash]
 ----
@@ -61,6 +60,22 @@ We create a working copy which we're going to add to the local monorepo.
 
 This will output some JSON including the URN of the project, make a note of the URN.
 
+=== Add the seed to the local peer seed configs
+
+First get the seed peer ID.
+
+[source,bash]
+----
+LNK_HOME=/tmp/seed-home ./lnk.sh profile peer
+----
+
+Then add the seed to the seed configs for the local peers
+
+[source,bash]
+----
+echo <peerid>@127.0.0.1:8799 | tee /tmp/link-local-1/<profile id>/seeds /tmp/link-local-2/<profile id>/seeds
+----
+
 === Start the seed
 
 In a fresh terminal:
@@ -70,14 +85,19 @@ In a fresh terminal:
 ./start-seed.sh
 ----
 
-=== Start the socket activated node
+=== Start the first peers gitd
 
 In a fresh terminal:
 
 [source,bash]
 ----
-./start-socket-activated.sh
+./start-git-server-1.sh
 ----
+
+Note that this script actually runs `systemd-socket-activate` to simulate a
+socket activated connection to the `gitd`. This means that the process will
+terminate once there are no more connections to service so you'll need to run
+this script again each time you want to communicate with the `gitd`.
 
 === Make some changes in the repo
 
@@ -100,17 +120,28 @@ it in the git config. There will be a remote called `rad` with a URL of the form
 git remote add linkd 'ssh://rad@127.0.0.1:9876/<URN>'
 ----
 
-=== Push the changes to the socket activated node
+=== Push the changes to the monorepo
 
 [source,bash]
 ----
 git push linkd main
 ----
 
-=== Examine results
+=== Clone the repo for the second peer
 
-If you take a look at the output of the socket activated node you'll see it
-starting up, connecting to the seed, and then announcing changes. Likewise in
-the seed you'll see it tracking a new project and pulling the changes. Finally
-if you do `tree /tmp/seed-home/<profile ID>/git/refs` you'll see the project
-refs are there.
+First get the peer ID of the first peer
+
+[source,bash]
+----
+LNK_HOME=/tmp/link-local-1 ./lnk.sh profile peer
+----
+
+[source,bash]
+----
+LNK_HOME=/tmp/link-local-2 ./lnk.sh lnk clone \
+    --urn <project URN>\
+    --path theproject2\
+    --peer <first peer ID>
+----
+
+This should now show the repository in the `theproject2` directory.
