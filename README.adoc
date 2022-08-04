@@ -62,18 +62,11 @@ This will output some JSON including the URN of the project, make a note of the 
 
 === Add the seed to the local peer seed configs
 
-First get the seed peer ID.
+This script gets the seed peer ID and then adds it to the seed configs for the local peers.
 
 [source,bash]
 ----
-LNK_HOME=/tmp/seed-home ./lnk.sh profile peer
-----
-
-Then add the seed to the seed configs for the local peers
-
-[source,bash]
-----
-echo <peerid>@127.0.0.1:8799 | tee /tmp/link-local-1/<profile id>/seeds /tmp/link-local-2/<profile id>/seeds
+./add-seed-config.sh
 ----
 
 === Start the seed
@@ -117,14 +110,16 @@ it in the git config. There will be a remote called `rad` with a URL of the form
 
 [source,bash]
 ----
-git remote add linkd 'ssh://rad@127.0.0.1:9876/<URN>'
+git remote add linkd 'ssh://rad@127.0.0.1:9987/<URN>.git'
 ----
 
 === Push the changes to the monorepo
 
+Push the changes on the current branch (`main` or `master`).
+
 [source,bash]
 ----
-git push linkd main
+git push linkd
 ----
 
 === Clone the repo for the second peer
