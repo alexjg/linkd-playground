@@ -133,7 +133,7 @@ LNK_HOME=/tmp/link-local-1 ./lnk.sh profile peer
 
 [source,bash]
 ----
-LNK_HOME=/tmp/link-local-2 ./lnk.sh lnk clone \
+LNK_HOME=/tmp/link-local-2 ./lnk.sh clone \
     --urn <project URN>\
     --path theproject2\
     --peer <first peer ID>
